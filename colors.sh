@@ -2,7 +2,7 @@
 # You can delete them, but I recommend commenting them out.
 #########################################################
 # Reset
-NC='\033[0m'       # Text Reset
+NC='\e[0m'       # Text Reset
 # -------------------------------------------------------
 # Regular Colors
 BLACK='\033[0;30m'        # Black
