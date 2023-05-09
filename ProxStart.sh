@@ -8,9 +8,9 @@ source ./vars.sh
 # Loop through the VM IDs and execute the qm start command
 for vmID in "${vmIDs[@]}"
 do
-    echo "____________________"
+    echo -e "____________________"
     echo -e "Starting VM $vmID..."
-    echo "--------------------"
+    echo -e "--------------------"
     qm start $vmID &> /dev/null
     
     # Wait for the VM to start up and respond to pings
@@ -39,12 +39,12 @@ do
 	    else
 		    COLOR=$RESET
 	    fi
-	    echo "${COLOR}-=VM $vmID $vm_status. =-${RESET}"
-	    echo "__VM IP ${vmIPs["$vmID"]} could not be reached__"
+	    echo -e "${COLOR}-=VM $vmID $vm_status. =-${RESET}"
+	    echo -e "__VM IP ${BLUE}${vmIPs["$vmID"]}${RESET} could not be reached__"
             read -p "Do you want to retry or continue? [retry/continue]" choice
             case $choice in
                 [Rr] | [Rr]etry )
-                    echo "Retrying VM startup for $vmID"
+                    echo "Retrying VM startup for ${BLUE}$vmID${RESET}"
                     qm start $vmID
                     ping_timeout=30
                     break
@@ -65,7 +65,7 @@ do
     then
         echo "VM $vmID ${GREEN}started${RESET}"
     else
-        echo "VM $vmID ${RED} encountered issues.${RESET}"
+        echo "${RED}VM ${BLUE}$vmID${RESET} encountered issues.${RESET}"
     fi
 done
 
