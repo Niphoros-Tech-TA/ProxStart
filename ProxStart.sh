@@ -1,8 +1,10 @@
 #!/bin/bash -x
 
 # Import any other variable files if you want
-source ./colors.sh
-source ./vars.sh
+source ./vars/vars.sh
+source ./vars/colors.sh
+# source ./prod/vars.sh
+# source ./prod/colors.sh
 
 
 # Loop through the VM IDs and execute the qm start command
