@@ -13,7 +13,7 @@ vmIDs=(
 # Depending on the boot time, you can reduce it as you see fit
 ########################################################
 
-ping_timeout=30
+ping_timeout=5
 
 #########################################################
 # Define an associative array of VM IP addresses
