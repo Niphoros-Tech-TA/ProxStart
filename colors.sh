@@ -34,5 +34,3 @@ UPURPLE='\033[4;35m'      # Purple - Underline
 UCYAN='\033[4;36m'        # Cyan - Underline
 UWHITE='\033[4;37m'       # White - Underline
 # -------------------------------------------------------
-
-asdfasdf
