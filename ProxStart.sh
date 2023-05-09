@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 # Import any other variable files if you want
 source ./colors.sh
@@ -31,30 +31,29 @@ do
     if ! $vm_up
     then
         while true; do
-	    $vm_status
 	    if [ "$vm_status" == "stopped" ]; then
 		    COLOR=$RED
-	    elif ["$vm_status" == "running" ]; then
+	    elif [ "$vm_status" == "running" ]; then
 		    COLOR=$GREEN
 	    else
-		    COLOR=$RESET
+		    COLOR=$NC
 	    fi
-	    echo -e "${COLOR}-=VM $vmID $vm_status. =-${RESET}"
-	    echo -e "__VM IP ${BLUE}${vmIPs["$vmID"]}${RESET} could not be reached__"
+	    echo -e "${COLOR}-=VM $vmID $vm_status. =-${NC}"
+	    echo -e "__VM IP ${BLUE}${vmIPs["$vmID"]}${NC} could not be reached__"
             read -p "Do you want to retry or continue? [retry/continue]" choice
             case $choice in
                 [Rr] | [Rr]etry )
-                    echo "Retrying VM startup for ${BLUE}$vmID${RESET}"
+                    echo -e "Retrying VM startup for ${BLUE}$vmID${NC}"
                     qm start $vmID
                     ping_timeout=30
                     break
                     ;;
                 [Cc] | [Cc]ontinue )
-                    echo "Continuing with next VM..."
+                    echo -e "Continuing with next VM..."
                     break
                     ;;
                 * )
-                    echo "Invalid choice. Please enter 'retry' or 'continue'."
+                    echo -e "Invalid choice. Please enter 'retry' or 'continue'."
                     ;;
             esac
 	done
@@ -63,9 +62,9 @@ do
     # Generate a report showing the status of each VM
     if $vm_up
     then
-        echo "VM $vmID ${GREEN}started${RESET}"
+        echo -e "VM $vmID ${GREEN}started${NC}"
     else
-        echo "${RED}VM ${BLUE}$vmID${RESET} encountered issues.${RESET}"
+        echo -e "${RED}VM ${BLUE}$vmID${NC} encountered issues.${NC}"
     fi
 done
 
