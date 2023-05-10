@@ -7,12 +7,10 @@ vmReport () {
     for vmID in "${vmIDs[@]}"
     do
         declare -Ag vmReportIDs
-        declare -Ag vmReportIPs
         vm_status=$(qm status $vmID)
         vmSimpleStatus=$(qm status $vmID | sed 's/status: //')
         # vmIP=${vmIPs["$vmID"]}
         vmReportIDs[$vmID]="$vmSimpleStatus"
-        vmReportIPs["${vmIPs["$vmID"]}"]="$vmSimpleStatus"
         if [[ "$vm_status" == "status: running" ]]; then
             echo -e "- VM ${BLUE}$vmID${NC} with IP ${YELLOW}${vmIPs["$vmID"]}${NC} has the ${GREEN}$vm_status${NC}."
 
@@ -29,7 +27,6 @@ vmReport () {
     echo -e "$vmReportTop" >> "$varFile"
     sleep 1
     echo "$(declare -p  vmReportIDs| sed 's/declare -A/declare -Ag/')" >> $varFile &> /dev/null
-    echo "$(declare -p  vmReportIPs| sed 's/declare -A/declare -Ag/')" >> $varFile &> /dev/null
     sleep 1
     echo "$vmReportBot" >> "$varFile"
 
