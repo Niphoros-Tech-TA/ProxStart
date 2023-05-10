@@ -8,9 +8,9 @@ source ./prod/colors.sh
 source ./modules/vmReport.sh
 
 # Lists all your VMs based on the ./vars/vars.sh file
-echo -e "${BPURPLE}--------------------------------------${NC}"
-echo -e "This is the current status of your VMs"
-echo -e "${BPURPLE}--------------------------------------${NC}"
+echo -e "-------------------------------------"
+echo -e "${UPURPLE}This is the current status of your VMs${NC}"
+echo -e "-------------------------------------"
 
 # This will create a list with all the information provided in the ./vars/vars.sh file
 # It creates 2 associative arrays for IDs and IPs 
@@ -47,7 +47,7 @@ do
                     while [[ "$vmCheckStatus" == "status: stopped" ]];
                     do
                         vmCheckStatus=$(qm status $RID)
-                        echo -e "${UNDERLINE}Starting VM ${BLUE}$RID${NC}...${NC}"
+                        echo -e "${UNDERLINE}Starting VM${BLUE} $RID${NC}...${NC}"
                         qm start $RID &>/dev/null
 
                         if [[ "$vmCheckStatus" == "status: running" ]]; then
@@ -72,9 +72,8 @@ do
     fi
 done
 
-echo -e "${BPURPLE}=====================================${NC}"
-echo -e "${BPURPLE}=====================================${NC}"
-echo -e "VM status after running the script"
-echo -e "${BPURPLE}-------------------------------------${NC}"
+echo -e "-------------------------------------"
+echo -e "${UPURPLE}VM status after running the script${NC}"
+echo -e "-------------------------------------"
 
 vmReport
