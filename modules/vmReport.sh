@@ -26,7 +26,7 @@ vmReport () {
     # Append new content
     echo -e "$vmReportTop" >> "$varFile"
     sleep 1
-    echo "$(declare -p  vmReportIDs| sed 's/declare -A/declare -Ag/')" >> $varFile &> /dev/null
+    echo "$(declare -p  vmReportIDs| sed 's/declare -A/declare -Ag/')" >> $varFile
     sleep 1
     echo "$vmReportBot" >> "$varFile"
 

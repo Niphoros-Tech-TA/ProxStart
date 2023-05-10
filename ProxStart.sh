@@ -24,39 +24,44 @@ do
 done <$varFile
 sleep 1
 
-echo -e "${BPURPLE}======================================${NC}"
+echo -e "${BPURPLE}=====================================${NC}"
+echo -e "${BPURPLE}=====================================${NC}"
 for RID in "${!vmReportIDs[@]}"
 do
     vmCheckStatus=$(qm status $RID)
     if [ "${vmReportIDs[$RID]}" == "running" ]; then
-        if ! [ ping -c 1 -W 1 ${vmIPs[$RID]} &> /dev/null ] ; then
-            echo -e "- For VM $RID the IP address ${YELLOW}${vmIPs["$RID"]}${NC} ${RED}could not be reached${NC}.${UNDERLINE}Please check your VM IP${NC}"
+        if ! nc -z -w 1 ${vmIPs["$RID"]} 22 &> /dev/null ;then
+            echo -e "- For VM ${BLUE}$RID${NC} the IP address ${YELLOW}${vmIPs["$RID"]}${NC} ${RED}could not be reached${NC}.${UNDERLINE}Please check your VM IP${NC}"
 
-        elif [ ping -c 1 -W 1 ${vmIPs[$RID]} &> /dev/null ] ; then
-            echo -e "VM IP ${vmIPs["$RID"]} reached the target VM"
+        elif nc -z -w 1 ${vmIPs["$RID"]} 22 &> /dev/null ; then
+            echo -e "- VM ${BLUE}$RID${NC} IP ${vmIPs[$RID]} ${GREEN}reached${NC} the target VM"
         fi
         echo -e "${BPURPLE}-------------------------------------${NC}"
     elif [ "${vmReportIDs[$RID]}" == "stopped" ]; then
-        while retry=true
+        while retry=true;
         do
-            read -p "$(echo -e "VM is stopped. Do you want to ${GREEN}[Ss]${NC}tart the VM or ${RED}[Cc]${NC}ontinue without it?")" retryChoice
+            read -p "$(echo -e "- VM ${BLUE}$RID${NC} is stopped. Do you want to ${GREEN}[Ss]${NC}tart the VM or ${RED}[Cc]${NC}ontinue without it?")" retryChoice
             case $retryChoice in 
                 [Ss] | [Ss]tart )
-                    vmCheckStatus=$(qm status $RID)
-                    if [[ "$vmCheckStatus" == "status: running" ]]; then
-                        echo "VM has ${GREEN}started${NC}"
-                        retry=true
-                    elif [[ "$vmCheckStatus" == "status: stopped" ]]; then
-                        qm start $RID
-                        echo -e "${UNDERLINE}Starting VM $RID again...${NC}"
-                        retry=false
-                    fi
-                break
+                    
+                    while [[ "$vmCheckStatus" == "status: stopped" ]];
+                    do
+                        vmCheckStatus=$(qm status $RID)
+                        echo -e "${UNDERLINE}Starting VM ${BLUE}$RID${NC}...${NC}"
+                        qm start $RID &>/dev/null
+
+                        if [[ "$vmCheckStatus" == "status: running" ]]; then
+                            echo -e "VM started${GREEN}succesfully${NC}"
+                            echo -e "${BPURPLE}-------------------------------------${NC}"
+                        fi
+                    done
+                    break
                 ;;
                 
                 [Cc] | [Cc]ontinue )
-                echo -e "VM $RID has ${RED}not started${NC}"
-                retry=true
+                    echo -e "VM $RID has ${RED}not started${NC}"
+                    echo -e "${BPURPLE}-------------------------------------${NC}"
+                    retry=true
                 break
                 ;;
 
@@ -67,7 +72,8 @@ do
     fi
 done
 
-echo -e "${BPURPLE}-------------------------------------${NC}"
+echo -e "${BPURPLE}=====================================${NC}"
+echo -e "${BPURPLE}=====================================${NC}"
 echo -e "VM status after running the script"
 echo -e "${BPURPLE}-------------------------------------${NC}"
 
