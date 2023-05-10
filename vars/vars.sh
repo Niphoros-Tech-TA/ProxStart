@@ -14,6 +14,7 @@ vmIDs=(
 ########################################################
 
 ping_timeout=5
+sec=5
 
 #########################################################
 # Define an associative array of VM IP addresses
@@ -25,3 +26,7 @@ vmIPs=(
 ["104"]="10.0.0.13" 
 ["105"]="192.168.0.1"
 )
+
+vmReportTop="###########VM Report Top#####################"
+vmReportBot="###########VM Report Bot#####################"
+varFile="/path/to/file"
