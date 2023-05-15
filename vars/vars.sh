@@ -1,6 +1,11 @@
 #########################################################
-# VM IDs that needs to be gotten from Proxmox
-# Check either the Proxmox UI or by running 'qm list'
+#Do not modify these unless you know what you are doing.
+#########################################################
+vmReportTop="###########VM Report Top#####################"
+vmReportBot="###########VM Report Bot#####################"
+
+#########################################################
+# This is where you add your VM IDs
 #########################################################
 vmIDs=(
 100 #Ansible Server
@@ -9,8 +14,8 @@ vmIDs=(
 )
 
 #########################################################
-# Define an associative array of VM IP addresses
-# This is similar to a dictionary in Python
+# This is where you add the IP associated to each VM
+# ["VM ID"]="VM IP"
 ########################################################
 declare -A vmIPs
 vmIPs=(
@@ -19,6 +24,8 @@ vmIPs=(
 ["105"]="192.168.0.1"
 )
 
-vmReportTop="###########VM Report Top#####################"
-vmReportBot="###########VM Report Bot#####################"
+#########################################################
+# Modify it for the full path of your ./vars/vars.sh
+# Example: /home/username/ProxStart/vars/vars.sh
+#########################################################
 varFile="/path/to/file"

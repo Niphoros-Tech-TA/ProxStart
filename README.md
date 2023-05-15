@@ -4,6 +4,11 @@
 This is a script that I created in order to start a set of VMs. 
 Mainly this was done for automatically starting Kubernetes-related VMs or Ansible testing.
 
+# Dependencies
+
+The only dependency that you will have to install is the `nc` package.
+This is the tool that I use to check the IP addresses for the VMs.
+
 # Getting started
 
 1. Clone the repo

@@ -17,7 +17,7 @@ echo -e "-------------------------------------"
 # More details on the modules
 vmReport
 
-# In order for *vmCheck* to have the updated version of the vmReport file, it needs to re-read again
+# After VM report, it will read the .vars/vars.sh file
 while IFS= read -r line; 
 do
     echo "Processing: $line" &> /dev/null
@@ -26,10 +26,12 @@ sleep 1
 
 echo -e "${BPURPLE}=====================================${NC}"
 echo -e "${BPURPLE}=====================================${NC}"
+# This iterates through the array resulted from vmReport function
 for RID in "${!vmReportIDs[@]}"
 do
     vmCheckStatus=$(qm status $RID)
     if [ "${vmReportIDs[$RID]}" == "running" ]; then
+        # The nc utility is used for checking IP connections
         if ! nc -z -w 1 ${vmIPs["$RID"]} 22 &> /dev/null ;then
             echo -e "- For VM ${BLUE}$RID${NC} the IP address ${YELLOW}${vmIPs["$RID"]}${NC} ${RED}could not be reached${NC}.${UNDERLINE}Please check your VM IP${NC}"
 
