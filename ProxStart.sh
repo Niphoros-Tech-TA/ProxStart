@@ -1,98 +1,79 @@
 #!/bin/bash
 
-source ./colors.sh
-source ./vars.sh
+# Import any other variable files if you want
+# source ./vars/vars.sh
+# source ./vars/colors.sh
+source ./prod/vars.sh
+source ./prod/colors.sh
+source ./modules/vmReport.sh
 
-#########################################################
-# VM IDs that needs to be gotten from Proxmox
-# Check either the Proxmox UI or by running 'qm list'
-#########################################################
-vmIDs=(
-100 #Ansible Server
-104 #Ubuntu Server
-105 #CentOS WebServer
-)
-# Define the ping timeout in seconds
-# Depending on the boot time, you can reduce it as you see fit
+# Lists all your VMs based on the ./vars/vars.sh file
+echo -e "-------------------------------------"
+echo -e "${UPURPLE}This is the current status of your VMs${NC}"
+echo -e "-------------------------------------"
 
-ping_timeout=30
+# This will create a list with all the information provided in the ./vars/vars.sh file
+# It creates 2 associative arrays for IDs and IPs 
+# More details on the modules
+vmReport
 
-# Define an associative array of VM IP addresses
-# This is similar to a dictionary in Python
-declare -A vmIPs
-vmIPs=(
-["100"]="10.0.0.100" 
-["104"]="10.0.0.103" 
-["105"]="192.168.0.1"
-)
-
-# Loop through the VM IDs and execute the qm start command
-for vmID in "${vmIDs[@]}"
+# In order for *vmCheck* to have the updated version of the vmReport file, it needs to re-read again
+while IFS= read -r line; 
 do
-    echo "____________________"
-    echo -e "Starting VM $vmID..."
-    echo "--------------------"
-    qm start $vmID &> /dev/null
-    
-    # Wait for the VM to start up and respond to pings
-    vm_up=false
-    while [ $ping_timeout -gt 0 ]
-    do
-        if ping -c 1 -W 1 ${vmIPs["$vmID"]} &> /dev/null
-        then
-            vm_up=true
-	    vm_status=$(qm status $vmID)
-            break
+    echo "Processing: $line" &> /dev/null
+done <$varFile
+sleep 1
+
+echo -e "${BPURPLE}=====================================${NC}"
+echo -e "${BPURPLE}=====================================${NC}"
+for RID in "${!vmReportIDs[@]}"
+do
+    vmCheckStatus=$(qm status $RID)
+    if [ "${vmReportIDs[$RID]}" == "running" ]; then
+        if ! nc -z -w 1 ${vmIPs["$RID"]} 22 &> /dev/null ;then
+            echo -e "- For VM ${BLUE}$RID${NC} the IP address ${YELLOW}${vmIPs["$RID"]}${NC} ${RED}could not be reached${NC}.${UNDERLINE}Please check your VM IP${NC}"
+
+        elif nc -z -w 1 ${vmIPs["$RID"]} 22 &> /dev/null ; then
+            echo -e "- VM ${BLUE}$RID${NC} IP ${vmIPs[$RID]} ${GREEN}reached${NC} the target VM"
         fi
-        sleep 1
-        ping_timeout=$(( $ping_timeout - 1 ))
-    done
-    
-    # If the VM has not responded to pings, ask the user if they want to retry or continue
-    if ! $vm_up
-    then
-        while true; do
-	    $vm_status
-	    if [ "$vm_status" == "stopped" ]; then
-		    COLOR=$RED
-	    elif ["$vm_status" == "running" ]; then
-		    COLOR=$GREEN
-	    else
-		    COLOR=$RESET
-	    fi
-	    echo "${COLOR}-=VM $vmID $vm_status. =-${RESET}"
-	    echo "__VM IP ${vmIPs["$vmID"]} could not be reached__"
-            read -p "Do you want to retry or continue? [retry/continue]" choice
-            case $choice in
-                [Rr] | [Rr]etry )
-                    echo "Retrying VM startup for $vmID"
-                    qm start $vmID
-                    ping_timeout=30
+        echo -e "${BPURPLE}-------------------------------------${NC}"
+    elif [ "${vmReportIDs[$RID]}" == "stopped" ]; then
+        while retry=true;
+        do
+            read -p "$(echo -e "- VM ${BLUE}$RID${NC} is stopped. Do you want to ${GREEN}[Ss]${NC}tart the VM or ${RED}[Cc]${NC}ontinue without it?")" retryChoice
+            case $retryChoice in 
+                [Ss] | [Ss]tart )
+                    
+                    while [[ "$vmCheckStatus" == "status: stopped" ]];
+                    do
+                        vmCheckStatus=$(qm status $RID)
+                        echo -e "${UNDERLINE}Starting VM${BLUE} $RID${NC}...${NC}"
+                        qm start $RID &>/dev/null
+
+                        if [[ "$vmCheckStatus" == "status: running" ]]; then
+                            echo -e "VM started${GREEN}succesfully${NC}"
+                            echo -e "${BPURPLE}-------------------------------------${NC}"
+                        fi
+                    done
                     break
-                    ;;
+                ;;
+                
                 [Cc] | [Cc]ontinue )
-                    echo "Continuing with next VM..."
-                    break
-                    ;;
+                    echo -e "VM $RID has ${RED}not started${NC}"
+                    echo -e "${BPURPLE}-------------------------------------${NC}"
+                    retry=true
+                break
+                ;;
+
                 * )
-                    echo "Invalid choice. Please enter 'retry' or 'continue'."
-                    ;;
+                ;;
             esac
-	done
-    fi
-    
-    # Generate a report showing the status of each VM
-    if $vm_up
-    then
-        echo "VM $vmID ${GREEN}started${RESET}"
-    else
-        echo "VM $vmID ${RED} encountered issues.${RESET}"
+        done
     fi
 done
 
-qm_list=$(qm list)
-echo "${qm_list%%$'\n'*}"
+echo -e "-------------------------------------"
+echo -e "${UPURPLE}VM status after running the script${NC}"
+echo -e "-------------------------------------"
 
-for vmid in "${vmIDs[@]}"; do
-    echo "$qm_list" | grep -E "^ *$vmid "
-done
+vmReport
